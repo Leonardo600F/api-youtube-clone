@@ -9,6 +9,10 @@ videoRoutes.post('/create-video', signIn, (request, response) => {
     videosRepository.createVideo(request, response);
 })
 
+videoRoutes.delete('/delete-video/:video_id', signIn, (request, response) => {
+    videosRepository.deleteVideo(request, response);
+})
+
 videoRoutes.get('/get-videos', signIn, (request, response) => {
     videosRepository.getVideos(request, response);
 })

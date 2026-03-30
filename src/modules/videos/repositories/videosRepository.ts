@@ -27,6 +27,36 @@ export default class VideosRepository {
         })
     }
 
+    deleteVideo(request: Request, response: Response) {
+        const { video_id } = request.params;
+        const user_id = request.user?.id;
+
+        if (!video_id) {
+            return response.status(400).json({ error: "video_id é obrigatório." });
+        }
+
+        pool.getConnection((err: any, connection: any) => {
+            connection.query(
+                'DELETE FROM videos WHERE video_id = ? AND user_id = ?',
+                [video_id, user_id],
+
+                (error: any, result: any, filds: any) => {
+                    connection.release();
+
+                    if (error) {
+                        return response.status(400).json(error);
+                    }
+
+                    if (result.affectedRows === 0) {
+                        return response.status(404).json({ error: "Vídeo não encontrado ou sem permissão." });
+                    }
+
+                    response.status(200).json({ message: "Vídeo removido com sucesso!" });
+                }
+            )
+        })
+    }
+
     getVideos(request: Request, response: Response) {
         const { user_id } = request.query;
 
