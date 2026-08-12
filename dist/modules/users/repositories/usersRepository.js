@@ -6,7 +6,7 @@ const bcrypt_1 = require("bcrypt");
 const jsonwebtoken_1 = require("jsonwebtoken");
 class UsersRepository {
     createUser(request, response) {
-        const { name, email, password } = request.body;
+        const { name, surname, email, nickname, password } = request.body;
         try {
             mysql_1.pool.getConnection((err, connection) => {
                 (0, bcrypt_1.hash)(password, 10, (err, hash) => {
@@ -22,7 +22,7 @@ class UsersRepository {
                             connection.release();
                             return response.status(409).json({ message: "E-mail já existente." });
                         }
-                        connection.query('INSERT INTO users (user_id, name, email, password) VALUES (?,?,?,?)', [(0, uuid_1.v4)(), name, email, hash], (error, result, fields) => {
+                        connection.query('INSERT INTO users (user_id, name, surname, email, nickname, password) VALUES (?,?,?,?,?)', [(0, uuid_1.v4)(), name, surname, email, nickname, hash], (error, result, fields) => {
                             connection.release();
                             if (error) {
                                 return response.status(400).json(error);

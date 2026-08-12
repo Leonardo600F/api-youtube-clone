@@ -8,10 +8,13 @@ const videosRepository_1 = __importDefault(require("../modules/videos/repositori
 const sign_in_1 = require("../middleware/sign-in");
 const videoRoutes = (0, express_1.Router)();
 const videosRepository = new videosRepository_1.default();
-videoRoutes.post('/create-video/:userId', sign_in_1.signIn, (request, response) => {
+videoRoutes.post('/create-video', sign_in_1.signIn, (request, response) => {
     videosRepository.createVideo(request, response);
 });
-videoRoutes.get('/get-videos/:userId', sign_in_1.signIn, (request, response) => {
+videoRoutes.delete('/delete-video/:video_id', sign_in_1.signIn, (request, response) => {
+    videosRepository.deleteVideo(request, response);
+});
+videoRoutes.get('/get-videos', sign_in_1.signIn, (request, response) => {
     videosRepository.getVideos(request, response);
 });
 videoRoutes.get('/search', (request, response) => {

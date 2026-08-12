@@ -2,18 +2,27 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.signIn = void 0;
 const jsonwebtoken_1 = require("jsonwebtoken");
-const signIn = (req, res, next) => {
+const signIn = (request, response, next) => {
     try {
-        const token = req.headers.authorization;
-        if (!token) {
-            return res.status(401).json({ message: "Token não  fornecido." });
+        const authHeader = request.headers.authorization;
+        if (!authHeader) {
+            return response.status(401).json({ error: "Token não fornecido" });
         }
-        const decoded = (0, jsonwebtoken_1.verify)(req.headers.authorization, process.env.SECRET);
-        req.user = decoded;
-        next();
+        if (!authHeader.startsWith('Bearer ')) {
+            return response.status(401).json({ error: "Formato de token inválido" });
+        }
+        const token = authHeader.substring(7);
+        try {
+            const decoded = (0, jsonwebtoken_1.verify)(token, process.env.SECRET);
+            request.user = decoded;
+            next();
+        }
+        catch (error) {
+            return response.status(401).json({ error: "Token inválido" });
+        }
     }
     catch (error) {
-        return res.status(401).json({ message: 'Login não autorizado.' });
+        return response.status(401).json({ error: "Erro na autenticação" });
     }
 };
 exports.signIn = signIn;

@@ -7,16 +7,19 @@ const express_1 = __importDefault(require("express"));
 const users_routes_1 = __importDefault(require("./routes/users.routes"));
 const videos_routes_1 = __importDefault(require("./routes/videos.routes"));
 const dotenv_1 = require("dotenv");
+const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
 (0, dotenv_1.config)();
-const cors = require('cors');
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.header('Access-Control-Allow-Methods', 'POST, GET, PATCH, DELETE, OPTIONS');
-    next();
-});
-app.use(cors());
+// Configuração do CORS
+app.use((0, cors_1.default)({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express_1.default.json());
-app.use('/user', users_routes_1.default);
+app.use('/users', users_routes_1.default);
 app.use('/videos', videos_routes_1.default);
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});

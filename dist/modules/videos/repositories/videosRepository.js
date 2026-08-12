@@ -16,6 +16,26 @@ class VideosRepository {
             });
         });
     }
+    deleteVideo(request, response) {
+        var _a;
+        const { video_id } = request.params;
+        const user_id = (_a = request.user) === null || _a === void 0 ? void 0 : _a.id;
+        if (!video_id) {
+            return response.status(400).json({ error: "video_id é obrigatório." });
+        }
+        mysql_1.pool.getConnection((err, connection) => {
+            connection.query('DELETE FROM videos WHERE video_id = ? AND user_id = ?', [video_id, user_id], (error, result, filds) => {
+                connection.release();
+                if (error) {
+                    return response.status(400).json(error);
+                }
+                if (result.affectedRows === 0) {
+                    return response.status(404).json({ error: "Vídeo não encontrado ou sem permissão." });
+                }
+                response.status(200).json({ message: "Vídeo removido com sucesso!" });
+            });
+        });
+    }
     getVideos(request, response) {
         const { user_id } = request.query;
         mysql_1.pool.getConnection((err, connection) => {
