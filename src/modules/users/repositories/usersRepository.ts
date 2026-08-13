@@ -33,7 +33,7 @@ export default class UsersRepository {
                             }
 
                             connection.query(
-                                'INSERT INTO users (user_id, name, surname, email, nickname, password) VALUES (?,?,?,?,?)',
+                                'INSERT INTO users (user_id, name, surname, email, nickname, password) VALUES (?,?,?,?,?,?)',
                                 [uuidv4(), name, surname, email, nickname, hash],
                                 (error: any, result: any, fields: any) => {
                                     connection.release();
