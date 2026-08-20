@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const users_routes_1 = __importDefault(require("./routes/users.routes"));
 const videos_routes_1 = __importDefault(require("./routes/videos.routes"));
+const api_routes_1 = __importDefault(require("./routes/api.routes"));
 const dotenv_1 = require("dotenv");
 const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
@@ -19,6 +20,7 @@ app.use((0, cors_1.default)({
 app.use(express_1.default.json());
 app.use('/users', users_routes_1.default);
 app.use('/videos', videos_routes_1.default);
+app.use('/youtube', api_routes_1.default);
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
