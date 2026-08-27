@@ -80,7 +80,7 @@ class UsersRepository {
         try {
             const decoded = (0, jsonwebtoken_1.verify)(token, process.env.SECRET);
             mysql_1.pool.getConnection((err, connection) => {
-                connection.query('SELECT user_id, name, email FROM users WHERE user_id = ?', [decoded.id], (error, results, fields) => {
+                connection.query('SELECT user_id, name, surname, email, nickname FROM users WHERE user_id = ?', [decoded.id], (error, results, fields) => {
                     connection.release();
                     if (error) {
                         return response.status(500).json({ error: "Erro ao buscar usuário." });

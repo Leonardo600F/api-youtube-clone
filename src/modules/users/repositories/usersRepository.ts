@@ -110,7 +110,7 @@ export default class UsersRepository {
 
             pool.getConnection((err: any, connection: any) => {
                 connection.query(
-                    'SELECT user_id, name, email FROM users WHERE user_id = ?',
+                    'SELECT user_id, name, surname, email, nickname FROM users WHERE user_id = ?',
                     [decoded.id],
                     (error: any, results: any, fields: any) => {
                         connection.release();
