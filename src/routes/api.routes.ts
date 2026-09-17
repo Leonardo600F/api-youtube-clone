@@ -1,24 +1,11 @@
 import { Router } from "express";
-import { getYoutubeVideos } from "../modules/youtube/services/youtubeService";
-import { searchYoutubeVideos } from "../modules/youtube/services/youtubeSearch";
+import { getVideosController } from "../modules/youtube/controllers/getVideosControllers";
+import { searchVideosController } from "../modules/youtube/controllers/searchVideosController";
 
 const apiRoutes = Router();
 
-apiRoutes.get('/videos', async (request, response) => {
+apiRoutes.get('/videos', getVideosController);
 
-    const { categoryId } = request.query;
-
-    const videos = await getYoutubeVideos(String(categoryId));
-
-    response.json(videos);
-});
-
-apiRoutes.get('/search', async (request, response) => {
-    const { search } = request.query;
-
-    const videosResults = await searchYoutubeVideos(String(search));
-
-    response.json(videosResults);
-});
+apiRoutes.get('/search', searchVideosController);
 
 export default apiRoutes;
