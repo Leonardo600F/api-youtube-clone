@@ -98,37 +98,46 @@ export default class UsersRepository {
         }
     }
 
-    getUser(request: Request, response: Response) {
-        const token = request.headers.authorization?.split(' ')[1];
-
-        if (!token) {
-            return response.status(401).json({ error: "Token não fornecido." });
-        }
-
+    async getUser(token: string) {
         try {
-            const decoded = verify(token, process.env.SECRET as string) as { id: string, email: string };
+            const decoded = verify(
+                token,
+                process.env.SECRET as string
+            ) as { id: string, email: string };
 
-            pool.getConnection((err: any, connection: any) => {
-                connection.query(
-                    'SELECT user_id, name, surname, email, nickname FROM users WHERE user_id = ?',
-                    [decoded.id],
-                    (error: any, results: any, fields: any) => {
-                        connection.release();
+            return new Promise((resolve, reject) => {
+                pool.getConnection((err: any, connection: any) => {
 
-                        if (error) {
-                            return response.status(500).json({ error: "Erro ao buscar usuário." });
-                        }
-
-                        if (results.length === 0) {
-                            return response.status(404).json({ error: "Usuário não encontrado." });
-                        }
-
-                        return response.status(200).json(results[0]);
+                    if (err) {
+                        reject(new Error("Erro ao conectar ao banco."));
+                        return;
                     }
-                );
+
+                    connection.query(
+                        'SELECT user_id, name, surname, email, nickname FROM users WHERE user_id = ?',
+                        [decoded.id],
+                        (error: any, results: any, fields: any) => {
+
+                            connection.release();
+
+                            if (error) {
+                                reject(new Error("Erro ao buscar usuário."));
+                                return;
+                            }
+
+                            if (results.length === 0) {
+                                resolve(null);
+                                return;
+                            }
+
+                            resolve(results[0]);
+                        }
+                    );
+                });
             });
+
         } catch (error) {
-            return response.status(401).json({ error: "Token inválido." });
+            throw new Error("Token inválido.");
         }
     }
 }
