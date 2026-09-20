@@ -55,46 +55,68 @@ export default class UsersRepository {
         }
     }
 
-    signIn(request: Request, response: Response) {
-        const { email, password } = request.body;
-
+    async signIn(email: string, password: string) {
         try {
-            pool.getConnection((err: any, connection: any) => {
-                connection.query(
-                    'SELECT * FROM users WHERE email = ?',
-                    [email],
-                    (error: any, results: any, fields: any) => {
-                        connection.release();
+            return new Promise((resolve, reject) => {
 
-                        if (error) {
-                            return response.status(400).json({ error: "Erro na sua autenticação." });
-                        }
+                pool.getConnection((err: any, connection: any) => {
 
-                        if (results.length === 0) {
-                            return response.status(400).json({ error: "Usuário não encontrado." });
-                        }
-
-                        compare(password, results[0].password, (err, result) => {
-                            if (err) {
-                                return response.status(400).json({ error: "Erro na sua autenticação." });
-                            }
-
-                            if (result) {
-                                const token = sign({
-                                    id: results[0].user_id,
-                                    email: results[0].email
-                                }, process.env.SECRET as string, { expiresIn: "1d" })
-
-                                return response.status(200).json({ token: token, message: "Autenticado com sucesso." });
-                            } else {
-                                return response.status(400).json({ error: "Usuário ou senha incorretos. Verifique os dados novamente." });
-                            }
-                        })
+                    if (err) {
+                        reject(new Error("Erro ao conectar ao banco."));
+                        return;
                     }
-                )
-            })
+
+                    connection.query(
+                        'SELECT * FROM users WHERE email = ?',
+                        [email],
+                        (error: any, results: any, fields: any) => {
+
+                            connection.release();
+
+                            if (error) {
+                                reject(new Error("Erro na sua autenticação."));
+                                return;
+                            }
+
+                            if (results.length === 0) {
+                                reject(new Error("Usuário não encontrado."));
+                                return;
+                            }
+
+                            compare(
+                                password,
+                                results[0].password,
+                                (err, result) => {
+
+                                    if (err) {
+                                        reject(new Error("Erro na sua autenticação."));
+                                        return;
+                                    }
+
+                                    if (result) {
+                                        const token = sign(
+                                            {
+                                                id: results[0].user_id,
+                                                email: results[0].email
+                                            },
+                                            process.env.SECRET as string,
+                                            { expiresIn: "1d" });
+
+                                        resolve({
+                                            token: token,
+                                            message: "Autenticado com sucesso."
+                                        });
+
+                                    } else { reject(new Error("Usuário ou senha incorretos. Verifique os dados novamente.")); }
+                                }
+                            );
+                        }
+                    );
+                });
+            });
+
         } catch (error) {
-            return response.status(500).json({ error: "Erro ao fazer login.", details: error });
+            throw new Error("Erro ao fazer login.");
         }
     }
 
