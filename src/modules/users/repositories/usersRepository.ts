@@ -2,67 +2,81 @@ import { pool } from "../../../mysql";
 import { v4 as uuidv4 } from 'uuid';
 import { hash, compare } from 'bcrypt';
 import { sign, verify } from 'jsonwebtoken';
-import { Request, Response } from "express";
-
 
 export default class UsersRepository {
-
     async createUser(
         name: string,
         surname: string,
         email: string,
         nickname: string,
         password: string
-
-    )
-
+    ) {
         try {
 
-    pool.getConnection((err: any, connection: any) => {
-        hash(password, 10, (err, hash) => {
-            if (err) {
-                return response.status(500).json(err);
-            }
+            return new Promise((resolve, reject) => {
 
-            connection.query(
-                'SELECT email FROM users WHERE email = ?',
-                [email],
-                (error: any, result: any, fields: any) => {
-                    if (error) {
-                        connection.release();
-                        return response.status(500).json(error);
+                pool.getConnection((err: any, connection: any) => {
+
+                    if (err) {
+                        reject(new Error("Erro ao conectar ao banco."));
+                        return;
                     }
 
-                    if (result.length > 0) {
-                        connection.release();
-                        return response.status(409).json({ message: "E-mail já existente." });
-                    }
+                    hash(password, 10, (err, hash) => {
 
-                    connection.query(
-                        'INSERT INTO users (user_id, name, surname, email, nickname, password) VALUES (?,?,?,?,?,?)',
-                        [uuidv4(), name, surname, email, nickname, hash],
-                        (error: any, result: any, fields: any) => {
+                        if (err) {
                             connection.release();
-
-                            if (error) {
-                                return response.status(400).json(error);
-                            }
-
-                            response.status(200).json({ message: "Usuário criado com sucesso." });
+                            reject(new Error("Erro ao criar usuário."));
+                            return;
                         }
-                    )
-                }
-            )
-        })
-    })
 
-} catch (error) {
-    return response.status(500).json({ error: "Erro ao criar usuário.", details: error });
-}
+                        connection.query(
+                            'SELECT email FROM users WHERE email = ?',
+                            [email],
+                            (error: any, result: any, fields: any) => {
+
+                                if (error) {
+                                    connection.release();
+                                    reject(new Error("Erro ao verificar e-mail."));
+                                    return;
+                                }
+
+                                if (result.length > 0) {
+                                    connection.release();
+                                    reject(new Error("E-mail já existente."));
+                                    return;
+                                }
+
+                                connection.query(
+                                    'INSERT INTO users (user_id, name, surname, email, nickname, password) VALUES (?,?,?,?,?,?)',
+                                    [uuidv4(), name, surname, email, nickname, hash],
+                                    (error: any, result: any, fields: any) => {
+
+                                        connection.release();
+
+                                        if (error) {
+                                            reject(new Error("Erro ao criar usuário."));
+                                            return;
+                                        }
+
+                                        resolve({
+                                            message: "Usuário criado com sucesso."
+                                        });
+                                    }
+                                );
+                            }
+                        );
+                    });
+                });
+            });
+
+        } catch (error) {
+            throw new Error("Erro ao criar usuário.");
+        }
     }
 
     async signIn(email: string, password: string) {
-    try {
+
         return new Promise((resolve, reject) => {
 
             pool.getConnection((err: any, connection: any) => {
@@ -120,52 +134,48 @@ export default class UsersRepository {
                 );
             });
         });
-
-    } catch (error) {
-        throw new Error("Erro ao fazer login.");
     }
-}
 
     async getUser(token: string) {
-    try {
-        const decoded = verify(
-            token,
-            process.env.SECRET as string
-        ) as { id: string, email: string };
+        try {
+            const decoded = verify(
+                token,
+                process.env.SECRET as string
+            ) as { id: string, email: string };
 
-        return new Promise((resolve, reject) => {
-            pool.getConnection((err: any, connection: any) => {
+            return new Promise((resolve, reject) => {
+                pool.getConnection((err: any, connection: any) => {
 
-                if (err) {
-                    reject(new Error("Erro ao conectar ao banco."));
-                    return;
-                }
-
-                connection.query(
-                    'SELECT user_id, name, surname, email, nickname FROM users WHERE user_id = ?',
-                    [decoded.id],
-                    (error: any, results: any, fields: any) => {
-
-                        connection.release();
-
-                        if (error) {
-                            reject(new Error("Erro ao buscar usuário."));
-                            return;
-                        }
-
-                        if (results.length === 0) {
-                            resolve(null);
-                            return;
-                        }
-
-                        resolve(results[0]);
+                    if (err) {
+                        reject(new Error("Erro ao conectar ao banco."));
+                        return;
                     }
-                );
-            });
-        });
 
-    } catch (error) {
-        throw new Error("Token inválido.");
+                    connection.query(
+                        'SELECT user_id, name, surname, email, nickname FROM users WHERE user_id = ?',
+                        [decoded.id],
+                        (error: any, results: any, fields: any) => {
+
+                            connection.release();
+
+                            if (error) {
+                                reject(new Error("Erro ao buscar usuário."));
+                                return;
+                            }
+
+                            if (results.length === 0) {
+                                resolve(null);
+                                return;
+                            }
+
+                            resolve(results[0]);
+                        }
+                    );
+                });
+            });
+
+        } catch (error) {
+            throw new Error("Token inválido.");
+        }
     }
-}
 }

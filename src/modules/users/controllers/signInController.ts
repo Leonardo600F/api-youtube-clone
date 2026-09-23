@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
-import UsersRepository from "../repositories/usersRepository";
-
-const usersRepository = new UsersRepository();
+import { signInUseCase } from "../useCases/signInUseCase";
 
 export async function signInController(
     request: Request,
@@ -10,7 +8,7 @@ export async function signInController(
     const { email, password } = request.body;
 
     try {
-        const result = await usersRepository.signIn(email, password);
+        const result = await signInUseCase(email, password);
 
         return response.status(200).json(result);
 
