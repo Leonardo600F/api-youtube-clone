@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getYoutubeVideos } from "../services/youtubeService";
+import { getVideosUseCase } from "../useCases/getVideosUseCase";
 
 export async function getVideosController(
     request: Request,
@@ -7,7 +7,7 @@ export async function getVideosController(
 ) {
     const { categoryId } = request.query;
 
-    const videos = await getYoutubeVideos(String(categoryId));
+    const videos = await getVideosUseCase(String(categoryId));
 
     response.json(videos);
 }

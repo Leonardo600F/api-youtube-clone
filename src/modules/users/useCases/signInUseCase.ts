@@ -6,10 +6,7 @@ export async function signInUseCase(
     email: string,
     password: string
 ) {
-    const result = await usersRepository.signIn(
-        email,
-        password
-    );
+    const result = await usersRepository.signIn(email, password);
 
     return result;
 }

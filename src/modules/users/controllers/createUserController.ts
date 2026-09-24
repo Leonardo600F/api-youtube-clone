@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
-import UsersRepository from "../repositories/usersRepository";
-
-const usersRepository = new UsersRepository();
+import { createUserUseCase } from "../useCases/createUserUseCase";
 
 export async function createUserController(
     request: Request,
@@ -11,13 +9,7 @@ export async function createUserController(
 
     try {
 
-        const result = await usersRepository.createUser(
-            name,
-            surname,
-            email,
-            nickname,
-            password
-        );
+        const result = await createUserUseCase(name, surname, email, nickname, password);
 
         return response.status(200).json(result);
 

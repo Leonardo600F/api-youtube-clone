@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
-import UsersRepository from "../repositories/usersRepository";
-
-const usersRepository = new UsersRepository();
+import { getUserUseCase } from "../useCases/getUserUseCase";
 
 export async function getUsersController(
     request: Request,
@@ -16,7 +14,7 @@ export async function getUsersController(
     }
 
     try {
-        const user = await usersRepository.getUser(token);
+        const user = await getUserUseCase(token);
 
         if (!user) {
             return response.status(404).json({
