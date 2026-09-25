@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { searchYoutubeVideos } from "../services/youtubeSearch";
+import { SearchVideosUseCase } from "../useCases/searchVideosUseCase";
 
 export async function searchVideosController(
     request: Request,
@@ -7,7 +7,7 @@ export async function searchVideosController(
 ) {
     const { search } = request.query;
 
-    const videosResults = await searchYoutubeVideos(String(search));
+    const videosResults = await SearchVideosUseCase(String(search));
 
     response.json(videosResults);
 }

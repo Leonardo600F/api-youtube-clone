@@ -4,79 +4,93 @@ import { Request, Response } from "express";
 
 export default class VideosRepository {
 
-    createVideo(request: Request, response: Response) {
+    async createVideo(user_id: string, thumbnail: string, title: string, description: string, publishedAt: string) {
+        return new Promise((resolve, reject) => {
+            pool.getConnection((err: any, connection: any) => {
 
-        const { user_id, thumbnail, title, description, publishedAt } = request.body;
-
-        pool.getConnection((err: any, connection: any) => {
-            connection.query(
-                'INSERT INTO videos (video_id, user_id, thumbnail, title, description, publishedAt) VALUES (?,?,?,?,?,?)',
-
-                [uuidv4(), user_id, thumbnail, title, description, publishedAt],
-
-                (error: any, result: any, filds: any) => {
-                    connection.release();
-
-                    if (error) {
-                        return response.status(400).json(error);
-                    }
-
-                    response.status(200).json({ message: "Vídeo criado com sucesso!" });;
+                if (err) {
+                    reject(new Error("Erro ao conectar ao banco."));
+                    return;
                 }
-            )
-        })
+
+                connection.query(
+                    'INSERT INTO videos (video_id, user_id, thumbnail, title, description, publishedAt) VALUES (?,?,?,?,?,?)',
+                    [uuidv4(), user_id, thumbnail, title, description, publishedAt],
+
+                    (error: any, result: any, fields: any) => {
+                        connection.release();
+
+                        if (error) {
+                            reject(new Error("Erro ao criar vídeo."));
+                            return;
+                        }
+
+                        resolve({ message: "Vídeo criado com sucesso!" });
+                    }
+                );
+            });
+        });
     }
 
-    deleteVideo(request: Request, response: Response) {
-        const { video_id } = request.params;
-        const user_id = request.user?.id;
+    async deleteVideo(video_id: string, user_id: string) {
+        return new Promise((resolve, reject) => {
+            pool.getConnection((err: any, connection: any) => {
 
-        if (!video_id) {
-            return response.status(400).json({ error: "video_id é obrigatório." });
-        }
-
-        pool.getConnection((err: any, connection: any) => {
-            connection.query(
-                'DELETE FROM videos WHERE video_id = ? AND user_id = ?',
-                [video_id, user_id],
-
-                (error: any, result: any, filds: any) => {
-                    connection.release();
-
-                    if (error) {
-                        return response.status(400).json(error);
-                    }
-
-                    if (result.affectedRows === 0) {
-                        return response.status(404).json({ error: "Vídeo não encontrado ou sem permissão." });
-                    }
-
-                    response.status(200).json({ message: "Vídeo removido com sucesso!" });
+                if (err) {
+                    reject(new Error("Erro ao conectar ao banco."));
+                    return;
                 }
-            )
-        })
+
+                connection.query(
+                    'DELETE FROM videos WHERE video_id = ? AND user_id = ?', [video_id, user_id],
+
+                    (error: any, result: any, fields: any) => {
+                        connection.release();
+
+                        if (error) {
+                            reject(new Error("Erro ao remover vídeo."));
+                            return;
+                        }
+
+                        if (result.affectedRows === 0) {
+                            reject(new Error("Vídeo não encontrado ou sem permissão."));
+                            return;
+                        }
+
+                        resolve({ message: "Vídeo removido com sucesso!" });
+                    }
+                )
+            });
+        });
     }
 
-    getVideos(request: Request, response: Response) {
-        const { user_id } = request.query;
+    async getVideos(user_id: string) {
+        return new Promise((resolve, reject) => {
+            pool.getConnection((err: any, connection: any) => {
 
-        pool.getConnection((err: any, connection: any) => {
-            connection.query(
-                'SELECT * FROM videos WHERE user_id = ?',
-                [user_id],
-
-                (error: any, results: any, filds: any) => {
-
-                    connection.release();
-
-                    if (error) {
-                        return response.status(400).json({ error: "Erro ao buscar os vídeos." });
-                    }
-
-                    return response.status(200).json({ message: "Vídeos retornados com sucesso.", videos: results });
+                if (err) {
+                    reject(new Error("Erro ao conectar ao banco."));
+                    return;
                 }
-            )
-        })
+
+                connection.query(
+                    'SELECT * FROM videos WHERE user_id = ?',
+                    [user_id],
+
+                    (error: any, results: any, filds: any) => {
+
+                        connection.release();
+
+                        if (error) {
+                            reject(new Error("Erro ao buscar vídeos!"));
+                            return;
+                        }
+
+                        resolve(results);
+                    }
+                );
+            });
+        });
     }
 
     searchVideos(request: Request, response: Response) {
