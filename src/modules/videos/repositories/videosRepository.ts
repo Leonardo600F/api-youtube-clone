@@ -93,27 +93,34 @@ export default class VideosRepository {
         });
     }
 
-    searchVideos(request: Request, response: Response) {
-        const { search } = request.query;
+    async searchVideos(search: string) {
+        return new Promise((resolve, reject) => {
+            pool.getConnection((err: any, connection: any) => {
 
-        pool.getConnection((err: any, connection: any) => {
-
-            connection.query(
-
-                'SELECT * FROM videos WHERE title LIKE ? OR description LIKE ?',
-                [`%${search}%`, `%${search}%`],
-
-                (error: any, results: any, filds: any) => {
-
-                    connection.release();
-
-                    if (error) {
-                        return response.status(400).json({ error: "Erro ao buscar os vídeos." });
-                    }
-
-                    return response.status(200).json({ message: "Vídeos retornados com sucesso.", videos: results });
+                if (err) {
+                    reject(new Error("Erro ao conectar ao banco."));
+                    return;
                 }
-            )
-        })
+
+                connection.query(
+
+                    'SELECT * FROM videos WHERE title LIKE ? OR description LIKE ?',
+                    [`%${search}%`, `%${search}%`],
+
+                    (error: any, results: any, filds: any) => {
+
+                        connection.release();
+
+                        if (error) {
+                            reject(new Error("Erro ao buscar vídeos!"));
+                            return;
+                        }
+
+                        resolve(results);
+                    }
+                );
+            });
+        });
+
     }
 }
