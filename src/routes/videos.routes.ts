@@ -1,24 +1,18 @@
-import { Router } from 'express';
-import VideosRepository from '../modules/videos/repositories/videosRepository';
-import { signIn } from '../middleware/sign-in';
+import { Router } from "express";
+import { createVideoController } from "../modules/videos/controllers/createVideoController";
+import { deleteVideoController } from "../modules/videos/controllers/deleteVideoController";
+import { getVideosController } from "../modules/videos/controllers/getVideosController";
+import { searchVideosController } from "../modules/videos/controllers/searchVideosController";
+import { signIn } from "../middleware/sign-in";
 
-const videoRoutes = Router();
-const videosRepository = new VideosRepository();
+const videosRoutes = Router();
 
-videoRoutes.post('/create-video', signIn, (request, response) => {
-    videosRepository.createVideo(request, response);
-})
+videosRoutes.post('/create-video', signIn, createVideoController);
 
-videoRoutes.delete('/delete-video/:video_id', signIn, (request, response) => {
-    videosRepository.deleteVideo(request, response);
-})
+videosRoutes.delete('/delete-video/:video_id', signIn, deleteVideoController);
 
-videoRoutes.get('/get-videos', signIn, (request, response) => {
-    videosRepository.getVideos(request, response);
-})
+videosRoutes.get('get-videos', signIn, getVideosController);
 
-videoRoutes.get('/search', (request, response) => {
-    videosRepository.searchVideos(request, response)
-})
+videosRoutes.get('/search', searchVideosController);
 
-export default videoRoutes;
+export default videosRoutes;
