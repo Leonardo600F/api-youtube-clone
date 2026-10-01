@@ -11,7 +11,7 @@ videosRoutes.post('/create-video', signIn, createVideoController);
 
 videosRoutes.delete('/delete-video/:video_id', signIn, deleteVideoController);
 
-videosRoutes.get('get-videos', signIn, getVideosController);
+videosRoutes.get('/get-videos', signIn, getVideosController);
 
 videosRoutes.get('/search', searchVideosController);
 

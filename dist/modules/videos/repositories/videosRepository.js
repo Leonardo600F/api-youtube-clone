@@ -1,62 +1,98 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mysql_1 = require("../../../mysql");
 const uuid_1 = require("uuid");
 class VideosRepository {
-    createVideo(request, response) {
-        const { user_id, thumbnail, title, description, publishedAt } = request.body;
-        mysql_1.pool.getConnection((err, connection) => {
-            connection.query('INSERT INTO videos (video_id, user_id, thumbnail, title, description, publishedAt) VALUES (?,?,?,?,?,?)', [(0, uuid_1.v4)(), user_id, thumbnail, title, description, publishedAt], (error, result, filds) => {
-                connection.release();
-                if (error) {
-                    return response.status(400).json(error);
-                }
-                response.status(200).json({ message: "Vídeo criado com sucesso!" });
-                ;
+    createVideo(user_id, thumbnail, title, description, publishedAt) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                mysql_1.pool.getConnection((err, connection) => {
+                    if (err) {
+                        reject(new Error("Erro ao conectar ao banco."));
+                        return;
+                    }
+                    connection.query('INSERT INTO videos (video_id, user_id, thumbnail, title, description, publishedAt) VALUES (?,?,?,?,?,?)', [(0, uuid_1.v4)(), user_id, thumbnail, title, description, publishedAt], (error, result, fields) => {
+                        connection.release();
+                        if (error) {
+                            reject(new Error("Erro ao criar vídeo."));
+                            return;
+                        }
+                        resolve({ message: "Vídeo criado com sucesso!" });
+                    });
+                });
             });
         });
     }
-    deleteVideo(request, response) {
-        var _a;
-        const { video_id } = request.params;
-        const user_id = (_a = request.user) === null || _a === void 0 ? void 0 : _a.id;
-        if (!video_id) {
-            return response.status(400).json({ error: "video_id é obrigatório." });
-        }
-        mysql_1.pool.getConnection((err, connection) => {
-            connection.query('DELETE FROM videos WHERE video_id = ? AND user_id = ?', [video_id, user_id], (error, result, filds) => {
-                connection.release();
-                if (error) {
-                    return response.status(400).json(error);
-                }
-                if (result.affectedRows === 0) {
-                    return response.status(404).json({ error: "Vídeo não encontrado ou sem permissão." });
-                }
-                response.status(200).json({ message: "Vídeo removido com sucesso!" });
+    deleteVideo(video_id, user_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                mysql_1.pool.getConnection((err, connection) => {
+                    if (err) {
+                        reject(new Error("Erro ao conectar ao banco."));
+                        return;
+                    }
+                    connection.query('DELETE FROM videos WHERE video_id = ? AND user_id = ?', [video_id, user_id], (error, result, fields) => {
+                        connection.release();
+                        if (error) {
+                            reject(new Error("Erro ao remover vídeo."));
+                            return;
+                        }
+                        if (result.affectedRows === 0) {
+                            reject(new Error("Vídeo não encontrado ou sem permissão."));
+                            return;
+                        }
+                        resolve({ message: "Vídeo removido com sucesso!" });
+                    });
+                });
             });
         });
     }
-    getVideos(request, response) {
-        const { user_id } = request.query;
-        mysql_1.pool.getConnection((err, connection) => {
-            connection.query('SELECT * FROM videos WHERE user_id = ?', [user_id], (error, results, filds) => {
-                connection.release();
-                if (error) {
-                    return response.status(400).json({ error: "Erro ao buscar os vídeos." });
-                }
-                return response.status(200).json({ message: "Vídeos retornados com sucesso.", videos: results });
+    getVideos(user_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                mysql_1.pool.getConnection((err, connection) => {
+                    if (err) {
+                        reject(new Error("Erro ao conectar ao banco."));
+                        return;
+                    }
+                    connection.query('SELECT * FROM videos WHERE user_id = ?', [user_id], (error, results, filds) => {
+                        connection.release();
+                        if (error) {
+                            reject(new Error("Erro ao buscar vídeos!"));
+                            return;
+                        }
+                        resolve(results);
+                    });
+                });
             });
         });
     }
-    searchVideos(request, response) {
-        const { search } = request.query;
-        mysql_1.pool.getConnection((err, connection) => {
-            connection.query('SELECT * FROM videos WHERE title LIKE ? OR description LIKE ?', [`%${search}%`, `%${search}%`], (error, results, filds) => {
-                connection.release();
-                if (error) {
-                    return response.status(400).json({ error: "Erro ao buscar os vídeos." });
-                }
-                return response.status(200).json({ message: "Vídeos retornados com sucesso.", videos: results });
+    searchVideos(search) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                mysql_1.pool.getConnection((err, connection) => {
+                    if (err) {
+                        reject(new Error("Erro ao conectar ao banco."));
+                        return;
+                    }
+                    connection.query('SELECT * FROM videos WHERE title LIKE ? OR description LIKE ?', [`%${search}%`, `%${search}%`], (error, results, filds) => {
+                        connection.release();
+                        if (error) {
+                            reject(new Error("Erro ao buscar vídeos!"));
+                            return;
+                        }
+                        resolve(results);
+                    });
+                });
             });
         });
     }
