@@ -18,5 +18,6 @@ const videosRepository = new videosRepository_1.default();
 function createVideoUseCase(user_id, thumbnail, title, description, publishedAt) {
     return __awaiter(this, void 0, void 0, function* () {
         const result = yield videosRepository.createVideo(user_id, thumbnail, title, description, publishedAt);
+        return result;
     });
 }

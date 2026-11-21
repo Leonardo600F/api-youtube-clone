@@ -1,10 +1,14 @@
 import { pool } from "../../../mysql";
 import { v4 as uuidv4 } from 'uuid';
-import { Request, Response } from "express";
 
 export default class VideosRepository {
 
-    async createVideo(user_id: string, thumbnail: string, title: string, description: string, publishedAt: string) {
+    async createVideo(
+        user_id: string,
+        thumbnail: string,
+        title: string,
+        description: string,
+        publishedAt: string) {
         return new Promise((resolve, reject) => {
             pool.getConnection((err: any, connection: any) => {
 

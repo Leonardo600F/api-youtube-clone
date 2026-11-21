@@ -9,5 +9,12 @@ export async function createVideoUseCase(
     description: string,
     publishedAt: string
 ) {
-    const result = await videosRepository.createVideo(user_id, thumbnail, title, description, publishedAt)
+    const result = await videosRepository.createVideo(
+        user_id,
+        thumbnail,
+        title,
+        description,
+        publishedAt);
+
+    return result;
 }
